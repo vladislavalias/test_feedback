@@ -5,6 +5,8 @@ if (feedbackIsFormValid())
   feedbackSaveForm();
 }
 
+proxyRedirectTo('/');
+
 function feedbackSaveForm()
 {
   
