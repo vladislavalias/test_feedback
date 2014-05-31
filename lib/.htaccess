@@ -1,0 +1,5 @@
+Options +FollowSymLinks
+Options -Indexes
+DirectoryIndex index.php
+RewriteEngine on
+RewriteRule (.*) /index.php [R=302,L]
