@@ -5,4 +5,4 @@ define('__ENVIRONMENT__', 'dev');
 
 require_once realpath(__DIR__ . '/lib/loader.php');
 
-loadAction('index/render/');
+loadCurrentAction('index/render/');

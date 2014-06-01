@@ -7,9 +7,12 @@
   <body>
     <div class="container">
       <div class="page-content">
-        <form id="feedback" method="post" action="feedback/save/" enctype="multipart/form-data">
+        <form id="feedback" method="post" action="<?php echo inputGenerateUrl('feedback/save') ?>" enctype="multipart/form-data">
           <div class="form-row error-row">
             <?php echo securityRenderErrors('feedback') ?>
+          </div>
+          <div class="form-row message-row">
+            <?php echo inputGetFlashMessage('feedback') ?>
           </div>
           <div class="form-row">
             <span>

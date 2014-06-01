@@ -72,3 +72,10 @@ form .form-row.error-row
   color: red;
   text-align: center;
 }
+
+form .form-row.message-row
+{
+  color: green;
+  text-align: center;
+  font-weight: bold;
+}

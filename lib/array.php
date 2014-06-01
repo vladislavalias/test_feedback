@@ -1,5 +1,12 @@
 <?php
 
+/**
+ * Добавляем ко всем эелементам массива профикс.
+ * 
+ * @param array $array
+ * @param string $prefix
+ * @return array
+ */
 function arrayAddPrefixKeys($array, $prefix)
 {
   $array = !is_array($array) ? array($array) : $array;
@@ -14,6 +21,12 @@ function arrayAddPrefixKeys($array, $prefix)
   return $result;
 }
 
+/**
+ * Делаем все элементы массива с большой буквы.
+ * 
+ * @param array $array
+ * @return array
+ */
 function arrayAllToUcfirst($array)
 {
   return array_map(

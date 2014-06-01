@@ -1,5 +1,11 @@
 <?php
 
+/**
+ * Проверяем наш глобальный флаг состояния на наличие соединения.
+ * 
+ * @global PDO $STATEMENT
+ * @return boolean
+ */
 function isConnected()
 {
   GLOBAL $STATEMENT;
@@ -7,6 +13,12 @@ function isConnected()
   return isset($STATEMENT['mysql']);
 }
 
+/**
+ * Коннектимся к базе используя ПДО и используя
+ * настройки.
+ * 
+ * @return \PDO|boolean
+ */
 function mysqlConnect()
 {
   if (isConnected()) return true;
@@ -25,6 +37,12 @@ function mysqlConnect()
   return $db;
 }
 
+/**
+ * Выполнение проивльного запроса к БД.
+ * 
+ * @param string $query
+ * @return boolean
+ */
 function mysqlExec($query)
 {
   $result = false;
@@ -42,6 +60,7 @@ function mysqlExec($query)
 }
 
 /**
+ * Выполнение запроса к БД.
  * 
  * @param string $query
  * @return PDOStatement
@@ -56,8 +75,6 @@ function mysqlQuery($query)
   }
   catch(PDOException $e)
   {
-    echo $connection->errorCode();
-    echo $connection->errorInfo();
     echo 'Error : '.$e->getMessage();
     exit();
   }
@@ -66,10 +83,11 @@ function mysqlQuery($query)
 }
 
 /**
+ * Выполение запроса с подготовкой данных.
  * 
- * @param type $query
- * @param type $params
- * @return array
+ * @param string $query
+ * @param array $params
+ * @return boolean
  */
 function mysqlPrepare($query, $params)
 {
@@ -91,9 +109,10 @@ function mysqlPrepare($query, $params)
 }
 
 /**
+ * Выполнение запроса с подготовкой для чтения.
  * 
- * @param type $query
- * @param type $params
+ * @param string $query
+ * @param array $params
  * @return array
  */
 function mysqlFetchAll($query, $params)
@@ -119,6 +138,15 @@ function mysqlFetchAll($query, $params)
   return $result;
 }
 
+/**
+ * Выборка только первого значения.
+ * 
+ * @param string $table
+ * @param array $what
+ * @param array $where
+ * @param string $whereCondition
+ * @return array
+ */
 function mysqlSelectOne($table, $what, $where = array(), $whereCondition = 'AND')
 {
   $selected = mysqlSelect($table, $what, $where, $whereCondition);
@@ -126,6 +154,15 @@ function mysqlSelectOne($table, $what, $where = array(), $whereCondition = 'AND'
   return array_shift($selected);
 }
 
+/**
+ * Выборка.
+ * 
+ * @param string $table
+ * @param array $what
+ * @param array $where
+ * @param string $whereCondition
+ * @return array
+ */
 function mysqlSelect($table, $what, $where = array(), $whereCondition = 'AND')
 {
   $query = sprintf('SELECT %s FROM %s WHERE %s',
@@ -137,6 +174,15 @@ function mysqlSelect($table, $what, $where = array(), $whereCondition = 'AND')
   return mysqlFetchAll($query, $where);
 }
 
+/**
+ * Обновление данных.
+ * 
+ * @param string $table
+ * @param array $what
+ * @param array $where
+ * @param string $condition
+ * @return boolean
+ */
 function mysqlUpdate($table, $what, $where, $condition = 'AND')
 {
   $query = sprintf('UPDATE %s SET %s WHERE %s',
@@ -148,6 +194,15 @@ function mysqlUpdate($table, $what, $where, $condition = 'AND')
   return mysqlPrepare($query, mysqlUpdateSetMerge($what, $where));
 }
 
+/**
+ * Вставка данных.
+ * 
+ * @param string $table
+ * @param array $what
+ * @param array $where
+ * @param string $condition
+ * @return boolean
+ */
 function mysqlInsert($table, $what)
 {
   $insert = arrayAddPrefixKeys($what, 'i_');
@@ -161,6 +216,13 @@ function mysqlInsert($table, $what)
   return mysqlPrepare($query, $insert);
 }
 
+/**
+ * Удаление данных.
+ * 
+ * @param string $table
+ * @param array $where
+ * @return boolean
+ */
 function mysqlDelete($table, $where)
 {
   $query = sprintf('DELETE FROM %s WHERE %s',
@@ -170,7 +232,13 @@ function mysqlDelete($table, $where)
   
   return mysqlPrepare($query, arrayAddPrefixKeys($where, 'w_'));
 }
-        
+
+/**
+ * Подготовка массива полей для вклинивания в запрос.
+ * 
+ * @param array $fields
+ * @return string
+ */
 function mysqlPrepareFields($fields)
 {
   if (!is_array($fields)) return $fields;
@@ -178,6 +246,17 @@ function mysqlPrepareFields($fields)
   return implode(', ', $fields);
 }
 
+/**
+ * Подготовка where условия из массива.
+ * Префикс нужен для того что бы потом в препаре
+ * не было дубляжа ключе если изменение или еще что
+ * будут по одним и тем же полям.
+ * 
+ * @param array $where
+ * @param string $condition
+ * @param string $paramPrefix
+ * @return string
+ */
 function mysqlPrepareWhere($where, $condition, $paramPrefix = '')
 {
   if (!$where) return 1;
@@ -192,11 +271,22 @@ function mysqlPrepareWhere($where, $condition, $paramPrefix = '')
   return implode(sprintf(' %s ', $condition), $compiled);
 }
 
+/**
+ * Подготовка апдейта.
+ * 
+ * @param array $update
+ * @return string
+ */
 function mysqlPrepareUpdateSet($update)
 {
   return mysqlPrepareWhere(array_keys($update), ',', 's_');
 }
 
+/**
+ * Получение мускл конфига для PDO коннекта.
+ * 
+ * @return array
+ */
 function mysqlCreateConfig()
 {
   return sprintf('%s:host=%s;dbname=%s',
@@ -206,6 +296,15 @@ function mysqlCreateConfig()
   );
 }
 
+/**
+ * Соединение полей для апдейта.
+ * Опять же префиксы нужны для исключения пересечения
+ * названия полей в разных операциях.
+ * 
+ * @param array $set
+ * @param array $where
+ * @return array
+ */
 function mysqlUpdateSetMerge($set, $where)
 {
   return array_merge(
@@ -215,6 +314,7 @@ function mysqlUpdateSetMerge($set, $where)
 }
 
 /**
+ * Получить конфиг мускла из его области.
  * 
  * @param string $name
  * @return mixed
@@ -232,6 +332,7 @@ function mysqlGetConfig($name)
 }
 
 /**
+ * Получить состояние PDO из нашей глобальной области.
  * 
  * @global array $STATEMENT
  * @param PDO $connection
@@ -245,6 +346,7 @@ function mysqlSaveConnection($connection)
 }
 
 /**
+ * Получить наше соединение из сохраненного состояния.
  * 
  * @return PDO
  */

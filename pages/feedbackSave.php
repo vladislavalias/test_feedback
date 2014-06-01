@@ -1,16 +1,28 @@
 <?php
 
-inputSetSession('feedback', 'errors', false);
+feedbackResetFormErrors();
 
 if (feedbackIsFormValid())
 {
   $fileName = feedbackSaveFile(feedbackSubmitedFile());
   $formData = array_merge(feedbackSubmitedData(), array('file' => $fileName));
   feedbackSaveForm($formData);
+  
+  inputSetFlashMessage('Message sended.');
+  feedbackResetFormErrors();
+  proxyRedirectTo(inputGenerateUrl('/'));
+}
+else
+{
+  loadForwardToAction('index/render');
 }
 
-proxyRedirectTo('/');
-
+/**
+ * Сохраняем нашу форму добавляя данные о создании
+ * и обновлении.
+ * 
+ * @param array $formData
+ */
 function feedbackSaveForm($formData)
 {
   $formData['created_at'] = time();
@@ -19,6 +31,11 @@ function feedbackSaveForm($formData)
   mysqlInsert('feedback', $formData);
 }
 
+/**
+ * Сохраняем файл возвращая путь к нему где сохранили.
+ * 
+ * @return string
+ */
 function feedbackSaveFile()
 {
   $file = feedbackSubmitedFile();
@@ -48,6 +65,11 @@ function feedbackSaveFile()
   return $result;
 }
 
+/**
+ * Проверяем форму на валидность и если нет то сохраняем ошибки.
+ * 
+ * @return boolean
+ */
 function feedbackIsFormValid()
 {
   $errors = array();
@@ -78,6 +100,11 @@ function feedbackIsFormValid()
   return false;
 }
 
+/**
+ * Получаем список обязательных полей.
+ * 
+ * @return array
+ */
 function feedbackRequiredFields()
 {
   return array(
@@ -86,12 +113,21 @@ function feedbackRequiredFields()
   );
 }
 
+/**
+ * Проверка отправлен ли файл и возвращаем его данные.
+ * 
+ * @return boolean
+ */
 function feedbackSubmitedFile()
 {
   return isset($_FILES['feedback']) ? $_FILES['feedback'] : array();
 }
 
-
+/**
+ * Получаем отправленные данные формы.
+ * 
+ * @return boolean
+ */
 function feedbackSubmitedData()
 {
   return inputFromPost(
@@ -102,6 +138,11 @@ function feedbackSubmitedData()
   );
 }
 
+/**
+ * Проверяем отправлена ли форма.
+ * 
+ * @return boolean
+ */
 function feedbackIsSubmited()
 {
   $form     = inputFromPost(
@@ -114,6 +155,12 @@ function feedbackIsSubmited()
   return isset($form['submited']);
 }
 
+/**
+ * Создаем папки для загрузки файлов.
+ * 
+ * @param string $dir
+ * @return string
+ */
 function feedbackCreateDir($dir)
 {
   if (!is_dir($dir))
@@ -124,6 +171,12 @@ function feedbackCreateDir($dir)
   return $dir;
 }
 
+/**
+ * Парсим имя и возвращаем его название и расширение.
+ * 
+ * @param string $filename
+ * @return array
+ */
 function feedbackParseFileName($filename)
 {
   $dotPos = strripos($filename, '.');
@@ -132,4 +185,14 @@ function feedbackParseFileName($filename)
     substr($filename, 0, $dotPos),
     substr($filename, $dotPos + 1)
   );
+}
+
+/**
+ * Сбрасываем ошибки нашей формы.
+ * 
+ * @return boolean
+ */
+function feedbackResetFormErrors()
+{
+  return inputSetSession('feedback', 'errors', false);
 }
