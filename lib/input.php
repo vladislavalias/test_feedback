@@ -5,17 +5,22 @@ function inputFromPost($name, $default = false, $filter = FILTER_DEFAULT, $requi
   return filter_input(INPUT_POST, $name, $filter, $require) ? : $default;
 }
 
-function inputFromGet($name, $default = false, $filter = FILTER_DEFAULT)
+function inputFromGet($name, $default = false, $filter = FILTER_DEFAULT, $require = FILTER_REQUIRE_SCALAR)
 {
-  return filter_input(INPUT_GET, $name, $filter) ? : $default;
+  return filter_input(INPUT_GET, $name, $filter, $require) ? : $default;
 }
 
-function inputFromServer($name, $default = false, $filter = FILTER_DEFAULT)
+function inputFromServer($name, $default = false, $filter = FILTER_DEFAULT, $require = FILTER_REQUIRE_SCALAR)
 {
-  return filter_input(INPUT_SERVER, $name, $filter) ? : $default;
+  return filter_input(INPUT_SERVER, $name, $filter, $require) ? : $default;
 }
 
-function inputFromSession($name, $default = false, $filter = FILTER_DEFAULT)
+function inputFromSession($name, $default = false)
 {
-  return filter_input(INPUT_SESSION, $name, $filter) ? : $default;
+  return isset($_SESSION[$name]) ? $_SESSION[$name] : $default;
+}
+
+function inputSetSession($namespace, $name, $value)
+{
+  return $_SESSION[$namespace][$name] = $value;
 }

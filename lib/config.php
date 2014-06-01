@@ -1,7 +1,6 @@
 <?php
 
-$CONFIG['mysql']['host']  = 'localhost';
-$CONFIG['mysql']['user']  = 'root';
-$CONFIG['mysql']['pass']  = 'psofroot';
-$CONFIG['mysql']['db']    = 'test_feedback';
-$CONFIG['mysql']['type']  = 'mysql';
+require_once realpath(__DIR__ . '/configMysql.php');
+
+$CONFIG['upload']['dir'] = realpath(__DIR__.'/../upload');
+$CONFIG['upload']['path'] = '/upload';

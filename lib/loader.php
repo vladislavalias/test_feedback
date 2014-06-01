@@ -37,12 +37,11 @@ function loadConfig($namespace)
   return array_key_exists($namespace, $CONFIG) ? $CONFIG[$namespace] : array();
 }
 
-function dump($value, $exit = true)
+function loadGetConfig($namespace, $name)
 {
-  if ('dev' !== __ENVIRONMENT__) return false;
+  $namespace = loadConfig($namespace);
   
-  var_dump($value);
-  if ($exit) exit();
+  return isset($namespace[$name]) ? $namespace[$name] : false;
 }
 
 function loadFile($path)
@@ -74,6 +73,14 @@ function loadAction($default)
   $path     = realpath(__DIR__ . '/../pages/' . $fileName);
   
   return loadFile($path);
+}
+
+function dump($value, $exit = true)
+{
+  if ('dev' !== __ENVIRONMENT__) return false;
+  
+  var_dump($value);
+  if ($exit) exit();
 }
 
 function throw404()

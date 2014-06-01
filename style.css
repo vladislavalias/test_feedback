@@ -66,3 +66,9 @@ form#feedback textarea
   width: 200px;
   height: 100px;
 }
+
+form .form-row.error-row
+{
+  color: red;
+  text-align: center;
+}

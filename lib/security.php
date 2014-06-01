@@ -5,25 +5,36 @@ function securityIsValidForm($formData, $fields)
   if (!$formData || !sizeof($formData)) return false;
   if (!$fields) return true;
   
-  $valid = false;
+  $valid  = true;
+  $errors = array();
   
-  if (securityIsNotEmpty($formData, $fields))
+  foreach ($fields as $field)
   {
-    foreach ($fields as $fieldName)
+    if (securityIsNotEmpty($formData, $field))
     {
-      $function = sprintf('securityValidate%s', ucfirst($fieldName));
-      $valid    = true;
-      
+      $function = sprintf('securityValidate%s', ucfirst($field));
+
       if(!function_exists($function))
       {
         $function = 'securityValidateDefault';
       }
+      $result = $function($formData[$field]);
       
-      $valid = $valid && $function($formData[$fieldName]);
+      if (!$result)
+      {
+        $errors[] = $field . ' not valid.';
+      }
+      
+      $valid = $valid && $result;
+    }
+    else
+    {
+      $valid    = false;
+      $errors[] = $field . ' required.';
     }
   }
   
-  return $valid;
+  return $valid ? : $errors;
 }
 
 function securityValidateDefault($value)
@@ -36,18 +47,20 @@ function securityValidateEmail($value)
   return filter_var($value, FILTER_VALIDATE_EMAIL);
 }
 
-function securityIsNotEmpty($data, $fields)
+function securityIsNotEmpty($data, $field)
 {
-  $notEmpty = true;
-  
-  $fields     = array_flip($fields);
-  $intersect  = array_intersect_key($data, $fields);
-  $diff       = array_diff(
-                  array_intersect_key($data, $fields),
-                  array(false, null, '')
-                );
-  $notEmpty   = $notEmpty && sizeof($fields) == sizeof($intersect);
-  $notEmpty   = $notEmpty && sizeof($fields) == sizeof($diff);
+  return isset($data[$field]) && $data[$field];
+}
 
-  return $notEmpty;
+function securityRenderErrors($namespace)
+{
+  $namespace  = inputFromSession($namespace, array());
+  $errors     = array();
+  
+  if ($namespace && isset($namespace['errors']) && $namespace['errors'])
+  {
+    $errors = $namespace['errors'];
+  }
+  
+  return implode('<br />', $errors);
 }
